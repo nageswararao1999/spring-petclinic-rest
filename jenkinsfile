@@ -9,14 +9,14 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'git@github.com:nageswararao1999/spring-petclinic-rest.git'
+                checkout scm  // This will automatically checkout the source code from your Git repository
             }
         }
 
         stage('Build with Maven') {
             steps {
                 script {
-                    sh 'mvn clean install'
+                    sh 'mvn clean install'  // Add your build steps here, for example: mvn clean install
                 }
             }
         }
@@ -51,7 +51,9 @@ pipeline {
 
     post {
         always {
-            cleanWs()
+            node {
+                cleanWs()  // Clean up workspace after each run
+            }
         }
     }
 }
