@@ -1,0 +1,57 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = 'nageswararao1999/my-spring-app'
+        DOCKER_TAG = 'latest'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'git@github.com:nageswararao1999/spring-petclinic-rest.git'
+            }
+        }
+
+        stage('Build with Maven') {
+            steps {
+                script {
+                    sh 'mvn clean install'
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh 'docker build -t $DOCKER_IMAGE:$DOCKER_TAG .'
+                }
+            }
+        }
+
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                script {
+                    withCredentials([string(credentialsId: 'nageswar', variable: 'DOCKER_TOKEN')]) {
+                        sh "echo $DOCKER_TOKEN | docker login -u nageswararao1999 --password-stdin"
+                        sh "docker push $DOCKER_IMAGE:$DOCKER_TAG"
+                    }
+                }
+            }
+        }
+
+        stage('Deploy with Ansible') {
+            steps {
+                script {
+                    sh 'ansible-playbook -i hosts deploy.yml'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}
