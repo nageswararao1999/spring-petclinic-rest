@@ -51,7 +51,7 @@ pipeline {
 
     post {
         always {
-            node {
+            node {  // Added node block to ensure the workspace is cleaned up correctly
                 cleanWs()  // Clean up workspace after each run
             }
         }
